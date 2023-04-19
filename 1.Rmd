@@ -1,7 +1,6 @@
 ---
-title: "1. Regresión lineal múltiple"
-subtitle: "Tarea-examen 1: Aprendizaje estadístico supervisado"
-author: "Carlos Iván Canto Varela, 315649888"
+title: "Regresión lineal múltiple"
+author: "Iván Canto"
 output: pdf_document
 header-includes:
 - \usepackage[spanish]{babel}
@@ -23,7 +22,7 @@ library(multcomp)
 
 # Preprocesamiento de los datos.
 
-setwd("C:/Users/calei/Documents/Programming/R/AEA/Tx1")
+# setwd("Your/working/directory")
 Data = read.csv("Preg1A.csv")
 
 Data$sex = factor(Data$sex)
