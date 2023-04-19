@@ -1,0 +1,350 @@
+---
+title: "3. Modelos lineales generalizados para datos binarios"
+subtitle: "Tarea-examen 1: Aprendizaje estadístico supervisado"
+author: "Carlos Iván Canto Varela 315649888"
+output: pdf_document
+header-includes:
+- \usepackage[spanish]{babel}
+- \usepackage{amsmath}
+- \decimalpoint
+---
+
+```{r include = FALSE}
+
+# Preparamiento del environment.
+
+rm(list = ls(all.names = TRUE))
+gc()
+
+library(ggplot2)
+library(multcomp)
+library(DHARMa)
+
+# Preprocesamiento de los datos.
+
+setwd("C:/Users/calei/Documents/Programming/R/AEA/Tx1")
+Data = read.csv("Preg3A.csv")
+
+Data$Insecticide = factor(Data$Insecticide)
+Data$Alive = Data$Number - Data$Killed
+str(Data)
+
+```
+
+Como visualización inicial de los datos, se presenta el siguiente diagrama de dispersión:
+
+```{r echo = FALSE, fig.cap = "Diagrama de dispersión para los datos", out.width = "50%", fig.align = 'center'}
+
+# Diagrama de dispersión inicial.
+
+ggplot(data = Data,
+       mapping = aes(x = Deposit, y = Killed/Number, color = Insecticide)) + 
+  geom_point(size = 1) +
+  scale_color_brewer(palette = "Set1") +
+  labs(title = "Insectos muertos observados",
+       x = "Dosis del insecticida",
+       y = "Proporción de insectos muertos por combinación (%)") +
+  theme_bw()
+
+```
+
+De primera instancia, el insecticida C parece ser el más efectivo. Por otra parte, los insecticidas A y B muestran una alta similaridad percibida; quizá se podría eliminar una de estas categorías en el modelo a ajustar.
+
+Se ajustará un modelo para datos binarios con las covariables \textit{Insecticide}, \textit{Deposit} y su interacción.
+
+```{r include = FALSE}
+
+# Ajuste de modelos por datos agrupados.
+
+datum = matrix(append(Data$Killed, Data$Alive),ncol = 2)
+
+glmFit = glm(datum ~ Data$Insecticide*Data$Deposit, family = binomial(link = "logit"))
+glm2 = glm(datum ~ Data$Insecticide*Data$Deposit, family = binomial(link = "probit"))
+glm3 = glm(datum ~ Data$Insecticide*Data$Deposit, family = binomial(link = "cloglog"))
+
+summary(glmFit)
+summary(glm2)
+summary(glm3)
+
+# Tabla de probabilidades.
+
+probs = data.frame(X = Data$Insecticide, Z = Data$Deposit)
+
+probs$logit = predict(glmFit, probs[,1:2], type = c("response"), se.fit = TRUE)$fit
+probs$prob = predict(glm2, probs[,1:2], type = c("response"), se.fit = TRUE)$fit
+probs$cll = predict(glm3, probs[,1:2], type = c("response"), se.fit = TRUE)$fit
+
+```
+
+De esta manera, con Dep $\equiv$ dosis de insecticida, se tienen los componentes lineales para cada insecticida:
+
+\begin{align*}
+&A: & &\beta_0 + \beta_3\text{Dep},\\
+&B: & &\beta_0 + \beta_1 + \beta_3\text{Dep} + \beta_4\text{Dep},\\
+&C: & &\beta_0 + \beta_2 + \beta_3\text{Dep} + \beta_5\text{Dep}.
+\end{align*}
+
+```{r include = FALSE}
+
+# Puntajes AIC y BIC de los modelos iniciales.
+
+AIC(glmFit)
+AIC(glm2)
+AIC(glm3)
+
+BIC(glmFit)
+BIC(glm2)
+BIC(glm3)
+
+```
+
+```{r include = FALSE}
+
+# Verificación de supuestos para los modelos probados. 
+
+set.seed(420)
+
+res = simulateResiduals(fittedModel = glmFit)
+res2 = simulateResiduals(fittedModel = glm2)
+res3 = simulateResiduals(fittedModel = glm3)
+
+plot(res)
+plot(res2)
+plot(res3)
+
+```
+
+Ningún modelo mostró disposición de cumplir los supuestos del componente lineal ni normalidad asintótica, por lo que se tiene que buscar una alternativa de regresión. Por ejemplo, aquella que incluye interacciones con la dosis en potencia cuadrada, donde los componentes sistemáticos del modelo extendido para cada insecticida son:
+
+```{r include = FALSE}
+
+# Ajuste de nuevos modelos por datos agrupados.
+
+glmex1 = glm(datum ~ Data$Insecticide*Data$Deposit + Data$Insecticide*I(Data$Deposit^2), family = binomial(link = "logit"))
+glmexFit = glm(datum ~ Data$Insecticide*Data$Deposit + Data$Insecticide*I(Data$Deposit^2), family = binomial(link = "probit"))
+glmex3 = glm(datum ~ Data$Insecticide*Data$Deposit + Data$Insecticide*I(Data$Deposit^2), family = binomial(link = "cloglog"))
+
+summary(glmex1)
+summary(glmexFit)
+summary(glmex3)
+
+# Tabla de nuevas probabilidades.
+
+probsex = data.frame(X = Data$Insecticide, Z = Data$Deposit)
+
+probsex$logit = predict(glmex1, probsex[,1:2], type = c("response"), se.fit = TRUE)$fit
+probsex$prob = predict(glmexFit, probsex[,1:2], type = c("response"), se.fit = TRUE)$fit
+probsex$cll = predict(glmex3, probsex[,1:2], type = c("response"), se.fit = TRUE)$fit
+
+```
+
+\begin{align*}
+&A: & &\beta_0 + \beta_3\text{Dep} + \beta_4\text{Dep}^2,\\
+&B: & &\beta_0 + \beta_1 + \beta_3\text{Dep} + \beta_4\text{Dep}^2 + \beta_5\text{Dep} + \beta_7\text{Dep}^2,\\
+&C: & &\beta_0 + \beta_2 + \beta_3\text{Dep} + \beta_4\text{Dep}^2 + \beta_6\text{Dep} + \beta_8\text{Dep}^2.
+\end{align*}
+
+Los modelos extendidos tendrán los puntajes
+
+```{r include = FALSE}
+
+# Puntajes AIC y BIC de los modelos extendidos.
+
+AIC(glmex1)
+AIC(glmexFit)
+AIC(glmex3)
+
+BIC(glmex1)
+BIC(glmexFit)
+BIC(glmex3)
+
+```
+
+\begin{center}
+\begin{tabular}{|c||c|c|}
+\hline
+\multicolumn{3}{|c|}{Puntajes por liga (modelo extendido)} \\
+\hline \hline
+\textbf{Liga} & \textbf{Puntaje AIC} & \textbf{Puntaje BIC}\\
+\hline
+Logit & 93.34989 & 101.3632\\
+\hline
+Probit & \textbf{93.30878} & \textbf{101.3221}\\
+\hline
+Cloglog & 95.243 & 103.2563\\
+\hline
+\end{tabular}
+\end{center}
+
+De acuerdo a los criterios encontrados, los modelos extendidos son mejores que los que no consideraron al cuadrado de las dosis con una diferencia promedio de 20 puntos. Otra ventaja es que los supuestos sí se cumplen (con cierta reservación) para el modelo con liga \textit{probit}.
+
+```{r echo = FALSE, fig.cap = "Gráficas de residuales simulados para los supuestos del nuevo modelo con liga probit", out.width = "50%", fig.align = 'center'}
+
+# Verificación de supuestos para el modelo indicado.
+
+resex = simulateResiduals(fittedModel = glmexFit)
+plot(resex)
+
+```
+
+Dicho esto, los resultados de la estimación puntual están en la figura siguiente:
+
+```{r include = FALSE}
+
+# Funciones para la gráfica del modelo extendido.
+
+summary(glmexFit)
+
+b0 = glmexFit[["coefficients"]][["(Intercept)"]]
+b1 = glmexFit[["coefficients"]][["Data$InsecticideB"]]
+b2 = glmexFit[["coefficients"]][["Data$InsecticideC"]]
+b3 = glmexFit[["coefficients"]][["Data$Deposit"]]
+b4 = glmexFit[["coefficients"]][["I(Data$Deposit^2)"]]
+b5 = glmexFit[["coefficients"]][["Data$InsecticideB:Data$Deposit"]]
+b6 = glmexFit[["coefficients"]][["Data$InsecticideC:Data$Deposit"]]
+b7 = glmexFit[["coefficients"]][["Data$InsecticideB:I(Data$Deposit^2)"]]
+b8 = glmexFit[["coefficients"]][["Data$InsecticideC:I(Data$Deposit^2)"]]
+
+funInsecA <- function(x){
+  pnorm(b0 + b3*x + b4*x^2)
+}
+funInsecB <- function(x){
+  pnorm(b0 + b1 + b3*x + b4*x^2 + b5*x + b7*x^2)
+}
+funInsecC <- function(x){
+  pnorm(b0 + b2 + b3*x + b4*x^2 + b6*x + b8*x^2)
+}
+
+```
+
+```{r echo = FALSE, fig.cap = "Curvas del modelo en el diagrama de dispersión de los datos", out.width = "50%", fig.align = 'center'}
+
+# Ploteo del modelo junto con el diagrama de dispersión inicial.
+
+ggplot(data = Data,
+       mapping = aes(x = Deposit, y = Killed/Number, color = Insecticide)) + 
+  geom_point(size = 1) +
+  labs(title = "Modelo extendido para los insectos muertos observados",
+       x = "Dosis del insecticida",
+       y = "Proporción de insectos muertos por combinación (%)") +
+  stat_function(fun = funInsecA, aes(colour = "A")) +
+  stat_function(fun = funInsecB, aes(colour = "B")) +
+  stat_function(fun = funInsecC, aes(colour = "C")) +
+  scale_colour_manual("Insecticida:", values = c("red", "blue", "darkgreen")) +
+  theme_bw()
+
+
+```
+
+Según el modelo, la dosis mínima con la que se puede indicar que el 75\% de los insectos sucumbe está dada por la siguiente tabla:
+
+```{r include = FALSE}
+
+# Raíces de la función inversa (polinomio) del modelo para cada insecticida.
+
+polyroot(c(b0 - qnorm(0.75), b3, b4))[1] # Insecticida A
+polyroot(c(b0 + b1 - qnorm(0.75), b3 + b5, b4+ b7))[1] # Insecticida B
+polyroot(c(b0 + b2 - qnorm(0.75), b3 + b6, b4+ b8))[1] # Insecticida C
+
+```
+
+\begin{center}
+\begin{tabular}{|c||c|}
+\hline
+\multicolumn{2}{|c|}{Dosis necesaria para matar tres cuartos de los bichos} \\
+\hline \hline
+\textbf{Insecticida} & \textbf{Dosis mínima}\\
+\hline
+A & 6.03\\
+\hline
+B & 5.63\\
+\hline
+C & \textbf{2.66}\\
+\hline
+\end{tabular}
+\end{center}
+
+Es obvio que el insecticida C tuvo los mejores resultados. ¿Se puede decir que es el mejor de todos los insecticidas?
+Para revisarlo se necesitan dos pruebas de hipótesis; sea $x\equiv$dosis de insecticida:
+
+\begin{itemize}
+\item C es mejor que A\par
+sólo sucede si
+\begin{gather*}
+\eta_C > \eta_A\\
+\iff \beta_0 + \beta_2 + \beta_3x + \beta_4x^2 + \beta_6 x + \beta_8x^2 > \beta_0 + \beta_3x + \beta_4 x^2\\
+\iff \beta_2 + \beta_6 + \beta_8 > 0\tag*{pues $x\geq0$.}
+\end{gather*}
+Al tomar esta alternativa, la prueba a realizar es
+\[H_0: \quad \beta_2 + \beta_6 + \beta_8 \leq 0 \quad \text{vs.} \quad H_a: \quad \lnot H_0.\]
+\end{itemize}
+
+```{r echo = FALSE}
+
+# Prueba de hipótesis por multcomp para verificar que C es mejor que A.
+
+K = matrix(c(0, 0, 1, 0, 0, 0, 1, 0, 1), ncol = 9, nrow = 1, byrow = TRUE)
+m = c(0)
+summary(glht(glmexFit, linfct = K, alternative = 'greater', rhs = m))
+
+```
+
+\begin{itemize}
+\item C es mejor que B:\par
+\begin{gather*}
+\eta_C > \eta_B\\
+\iff \beta_0 + \beta_2 + \beta_3x + \beta_4x^2 + \beta_6 x + \beta_8x^2\\
+>\\
+\beta_0 + \beta_1 + \beta_3x + \beta_4 x^2 + \beta_5x + \beta_7x^2\\
+\iff -\beta_1 + \beta_2 -\beta_5 + \beta_6 - \beta_7 + \beta_8 > 0\tag*{pues $x\geq0$;}
+\end{gather*}
+\end{itemize}
+similarmente, se tiene
+\[H_0: \quad -\beta_1 + \beta_2 -\beta_5 + \beta_6 - \beta_7 + \beta_8 \leq 0 \quad \text{vs.} \quad H_a: \quad \lnot H_0.\]
+
+```{r echo = FALSE}
+
+# Prueba de hipótesis por multcomp para verificar que C es mejor que A.
+
+K = matrix(c(0, -1, 1, 0, 0, -1, 1, -1, 1), ncol = 9, nrow = 1, byrow = TRUE)
+m = c(0)
+summary(glht(glmexFit, linfct = K, alternative = 'greater', rhs = m))
+
+```
+
+Ya que en ambas pruebas se halló suficiente evidencia para rechazar que el insecticida C es peor que las alternativas, se puede afirmar que este es el mejor con una significancia de 0.05.
+
+Previamente se mencionó que los insecticidas A y B resultaban bastante similares visualmente. Con otra prueba se puede verificar -o disentir- dicha afirmación:
+
+\begin{gather*}
+\eta_A = \eta_B\\
+\iff \beta_0 + \beta_3x + \beta_4x^2 = \beta_0 + \beta_1 + \beta_3x + \beta_4 x^2 + \beta_5x + \beta_7x^2\\
+\iff \beta_1 + \beta_5x + \beta_7x^2 = 0\\
+\iff \beta_1 = \beta_5 = \beta_7 = 0;\tag*{pues $x\geq0$;}
+\end{gather*}
+
+de donde
+
+\[H_0: \quad \begin{bmatrix}
+\beta_1\\
+\beta_5\\
+\beta_7
+\end{bmatrix} = \begin{bmatrix}
+0\\
+0\\
+0
+\end{bmatrix} \quad \text{vs.} \quad H_a: \quad \beta_i \not = 0 \text{ para } i\in\{1,5,7\}.\]
+
+```{r echo = FALSE}
+
+# Prueba de hipótesis por multcomp para verificar que A tiene un desempeño igual a B.
+
+K = matrix(c(0, 1, 0, 0, 0, 0, 0, 0, 0,
+             0, 0, 0, 0, 0, 1, 0, 0, 0,
+             0, 0, 0, 0, 0, 0, 0, 1, 0), ncol = 9, nrow = 3, byrow = TRUE)
+m = c(0)
+summary(glht(glmexFit, linfct = K, rhs = m), test = Ftest())
+
+```
+
+Con este resultado no se halló evidencia para negar que el insecticida A sea igual al B y se puede decir que tienen un desempeño similar con un valor $p$ mayor al 5\%. Cabe mencionar que esto no afirma la igualdad ni la diferencia, sólo la similitud como causa natural de la hipótesis alternativa dada esta prueba.

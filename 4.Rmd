@@ -1,0 +1,300 @@
+---
+title: "4. Modelos lineales generalizados para datos de conteos"
+subtitle: "Tarea-examen 1: Aprendizaje estadístico supervisado"
+author: "Carlos Iván Canto Varela 315649888"
+output: pdf_document
+header-includes:
+- \usepackage[spanish]{babel}
+- \usepackage{multirow}
+- \usepackage{amsmath}
+- \decimalpoint
+---
+
+```{r include = FALSE}
+
+# Preparamiento del environment.
+
+rm(list = ls(all.names = TRUE))
+gc()
+
+library(ggplot2)
+library(MASS)
+library(multcomp)
+library(DHARMa)
+
+# Preprocesamiento de los datos.
+
+setwd("C:/Users/calei/Documents/Programming/R/AEA/Tx1")
+Data = read.csv("Preg4.csv")
+
+Data$Age = factor(Data$Age)
+Data$City = factor(Data$City)
+Data$logPop = log(Data$Pop)
+str(Data)
+
+```
+
+La siguiente gráfica de dispersión provee una idea básica de los datos proporcionados.
+
+```{r echo = FALSE, fig.cap = "Diagrama de dispersión para los datos", out.width = "80%", fig.align = 'center'}
+
+# Diagrama de dispersión inicial.
+
+ggplot(data = Data,
+       mapping = aes(x = Age, y = Cases/Pop, color = City)) + 
+  geom_point(size = 1) +
+  scale_color_brewer(palette = "Set1") +
+  labs(title = "Incidencia en las ciudades según la edad",
+       x = "Grupo de edad",
+       y = "Proporción de casos por combinación (%)") +
+  theme_bw()
+
+```
+
+Puede verse una clarísima tendencia al aumento de casos conforme al grupo de edad para todas las ciudades. Adicionalmente, pareciera que la ciudad de Fredericia tiene una proporción mayor relativa a las demás ciudades.
+
+Como primer modelo propuesto se tomará una distribución Poisson con liga logarítimica y las interacciones entre las variables categóricas. El término \textit{offset} es necesario en el modelo pues se usarán las tasas de incidencia.
+
+```{r include = FALSE}
+
+# Ajuste del modelo Poisson, liga logarítmica.
+
+glmFit1 = glm(Cases ~ Age*City + offset(logPop), family = poisson(link = "log"), data = Data)
+summary(glmFit1)
+
+```
+
+También se considerará un modelo con sólo la edad como variable.
+
+```{r include = FALSE}
+
+# Ajuste reducido.
+
+glmFit = glm(Cases ~ Age + offset(logPop), family = poisson(link = "log"), data = Data)
+summary(glmFit)
+
+# Pseudoprueba para el parámetro de dispersión.
+
+deviance(glmFit)/df.residual(glmFit) # Similar a 1, no hay problema con el parámetro de dispersión.
+
+# Supuestos del modelo
+
+res = simulateResiduals(fittedModel = glmFit)
+plot(res) # Se cumplen los supuestos del modelo.
+
+
+```
+
+```{r echo = FALSE}
+
+# Prueba de hipótesis para la igualdad a cero de los coeficientes en cuestión de descarte.
+
+anova(glmFit1, glmFit, test = 'Chisq')
+
+```
+
+Con un valor $p$ mayor a una significancia de 0.05, se puede asentir que no hay evidencia en favor a la diferencia entre los coeficientes añadidos y el cero. Por otra parte, los criterios de desempeño
+
+```{r include = FALSE}
+
+# Criterios AIC y BIC de ambos modelos.
+
+AIC(glmFit1)
+BIC(glmFit1)
+
+AIC(glmFit)
+BIC(glmFit)
+
+```
+
+\begin{center}
+\begin{tabular}{|c||c|c|}
+\hline
+\multicolumn{3}{|c|}{Puntajes por versión del modelo} \\
+\hline \hline
+\textbf{Modelo} & \textbf{Puntaje AIC} & \textbf{Puntaje BIC}\\
+\hline
+Original & 121.473 & 141.3876\\
+\hline
+Reducido & \textbf{108.4512} & \textbf{113.4299}\\
+\hline
+\end{tabular}
+\end{center}
+
+indican que el mejor modelo es el reducido. Adicionalmente, se vio que el comportamiento de las incidencias por ciudad es visualmente similar entre sí; por lo que existe un argumento más a favor de la reducción.
+
+Por otra parte, un ajuste con distribución binomial negativa también puede ser significante.
+
+```{r echo = FALSE}
+
+# Ajuste del modelo binomial negativo, liga logarítmica.
+
+glmFit3 = glm.nb(Cases ~ Age + offset(logPop), data = Data, link="log")
+summary(glmFit3)
+
+```
+
+Nótese la advertencia sobre las iteraciones del cálculo para theta en el modelo binomial negativo. Esto podría ser indicador que los datos no están lo suficientemente dispersos en relatividad a la media, por lo que el modelo reducido con distribución Poisson será más apropiado para el caso en mano. Además, el Poisson mantuvo mejores coeficientes AIC y BIC.
+
+```{r include = FALSE}
+
+# Puntajes AIC y BIC de los últimos dos modelos.
+
+AIC(glmFit)
+AIC(glmFit3)
+
+BIC(glmFit)
+BIC(glmFit3)
+
+# Dataframe para predict. Se agrupó a todos los pobladores de las mismas edades independientemente de la ciudad para dar un intervalo más preciso.
+
+datum = data.frame(X = seq(1, 5, 1), Age = c(Data$Age[Data$X == 1], Data$Age[Data$X == 2], Data$Age[Data$X == 3], Data$Age[Data$X == 4], Data$Age[Data$X == 5]), logPop = c(log(sum(Data$Pop[Data$Age == '40-54'])), log(sum(Data$Pop[Data$Age == '55-59'])), log(sum(Data$Pop[Data$Age == '60-64'])), log(sum(Data$Pop[Data$Age == '65-69'])), log(sum(Data$Pop[Data$Age == '70-74']))))
+
+# Estimación del componente lineal
+
+linComp = predict(glmFit, newdata = datum, type="link", se.fit = TRUE)
+head(linComp)
+
+# Intervalos de confianza simultáneos al 95% para cada edad.
+
+K0 <- cbind(1, 0, 0, 0, 0)
+K1 <- cbind(1, 1, 0, 0, 0)
+K2 <- cbind(1, 0, 1, 0, 0)
+K3 <- cbind(1, 0, 0, 1, 0)
+K4 <- cbind(1, 0, 0, 0, 1)
+
+K = rbind(K0, K1, K2, K3, K4)
+
+fitE = glht(glmFit, linfct = K)
+fitci = confint(fitE, level = 0.95)
+exp(fitci$confint)
+
+```
+
+Dicho esto, los intervalos de confianza simultáneos al 95\% según la edad son
+
+\begin{gather*}
+40-54: [0.0018, 0.0044], \quad 55-59: [0.0053, 0.0132], \quad 60-64: [0.0086, 0.0189],\\
+65-69: [0.0112, 0.024] \quad \text{y} \quad 70-74: [0.012, 0.0271];
+\end{gather*}
+
+y se ilustran a continuación:
+
+```{r echo = FALSE, fig.cap = "Diagrama de dispersión con intervalos de confianza simultáneos", out.width = "80%", fig.align = 'center'}
+
+# Dataframe de apoyo para las gráficas.
+
+d1 = exp(fitci$confint)[6:10]
+d2 = exp(fitci$confint)[11:15]
+plotdf = data.frame(x = datum$Age, y = c(d1,d2), City = '(95% Interval)')
+
+# Gráficas de los intervalos por edades.
+
+ggplot(data = Data,
+       mapping = aes(x = Age, y = Cases/Pop, color = City)) + 
+  geom_point(size = 1) +
+  scale_color_brewer(palette = "Set1") +
+  labs(title = "Intervalos simultáneos para la tasa de incidencia según la edad",
+       x = "Grupo de edad",
+       y = "Proporción de casos por combinación (%)") +
+  geom_line(data = plotdf, aes(x, y, group = x), linetype = "dotted") +
+  theme_bw()
+
+
+```
+
+La otra alternativa es adaptar un modelo donde la edad sea variable continua mediante aproximaciones con los puntos medios de cada intervalo.
+
+```{r include = FALSE}
+
+# Nuevas columnas de edad continua. La entrada para cada intervalo [a,b] proviene de a+(b-a)/2.
+
+Data$Ageprima = rep(c(47, 57, 62, 67, 72), 4)
+Data$Ageprima2 = Data$Ageprima^2
+
+# Ajuste de modelos con la edad continua.
+
+glmContFit1 = glm(Cases ~ Ageprima + offset(logPop), family = poisson(link = "log"), data = Data)
+glmContFit = glm(Cases ~ Ageprima + Ageprima2 + offset(logPop), family = poisson(link = "log"), data = Data)
+glmContFit3 = glm.nb(Cases ~ Ageprima + offset(logPop), data = Data, link="log")
+glmContFit4 = glm.nb(Cases ~ Ageprima + Ageprima2 + offset(logPop), data = Data, link="log") # Mismo error de iteración. Los datos no se acoplan bien a la distribución.
+
+# Supuestos de cada modelo.
+
+res1 = simulateResiduals(fittedModel = glmContFit1)
+resCont = simulateResiduals(fittedModel = glmContFit)
+res3 = simulateResiduals(fittedModel = glmContFit3)
+res4 = simulateResiduals(fittedModel = glmContFit4)
+
+plot(res1) # No queda la parte lineal.
+plot(resCont) # Pasa las pruebas.
+plot(res3) # No parece quedar en lo lineal.
+plot(res4) # Pasa las pruebas.
+
+# Criterio por AIC y BIC.
+
+AIC(glmContFit1)
+AIC(glmContFit) # Menor AIC.
+AIC(glmContFit3)
+AIC(glmContFit4)
+
+BIC(glmContFit1)
+BIC(glmContFit) # Menor BIC.
+BIC(glmContFit3)
+BIC(glmContFit4)
+
+```
+
+Después de ajustar los cuatro modelos, el que parece más adecuado de utilizar es el distribuido Poisson con las variables Edad y Edad cuadrada continuas. Este no sólo cumple los supuestos requeridos, sino que también tuvo los menores puntajes AIC y BIC.
+
+Dicho esto, una pregunta de interés es si a mayor edad existe mayor incidencia de cáncer de pulmón. De forma analítica, esto se puede verificar por la función del modelo ajustado:
+
+\begin{gather*}
+\ln(\mu) = \beta_0 + \beta_1\text{Edad} + \beta_2\text{Edad}^2 + \ln(\text{Pop})\\
+\iff L \equiv \ln\left(\frac{\mu}{\text{Pop}}\right) = \beta_0 + \beta_1\text{Edad} + \beta_2\text{Edad}^2\\
+\iff \frac{d}{d\text{Edad}}L = \beta_1 + \beta_2\text{Edad}.
+\end{gather*}
+
+Para interpretar esto, se usó la prueba de hipótesis para
+
+\[H_a: \quad \beta_2 \geq 0 \quad \text{vs.} \quad H_0:\quad \quad \beta_2 < 0\]
+
+```{r echo = FALSE}
+
+# Prueba de hipótesis por multcomp.
+
+K = matrix(c(0, 0, 1), ncol = 3, nrow = 1, byrow = TRUE)
+m = c(0)
+summary(glht(glmContFit, linfct = K, alternative = 'less', rhs = m))
+
+```
+
+donde el valor $p$ menor a una significancia de 0.05 implica que la derivada será una recta con pendiente negativa. Para las edades de interés se sigue que esta es positiva, por lo que la función del modelo es creciente. En otras palabras, se puede decir que a mayor edad hay una mayor incidencia de cáncer de pulmón.
+
+Véase la gráfica siguiente para una ilustración visual del fenómeno:
+
+```{r echo = FALSE, fig.cap = "Crecimiento del modelo con la edad como variable continua", out.width = "80%", fig.align = 'center'}
+
+# Función del modelo.
+
+b0 = glmContFit[["coefficients"]][["(Intercept)"]]
+b1 = glmContFit[["coefficients"]][["Ageprima"]]
+b2 = glmContFit[["coefficients"]][["Ageprima2"]]
+
+func = function(x){
+  exp(b0 + b1*x + b2*x^2)
+}
+
+# Gráfica de apoyo a la explicación.
+
+ggplot(data = Data,
+       mapping = aes(x = Ageprima, y = Cases/Pop, color = City)) + 
+  geom_point(size = 1) +
+  scale_color_brewer(palette = "Set1") +
+  labs(title = "Incidencia en las ciudades según la edad",
+       x = "Grupo de edad",
+       y = "Proporción de casos por combinación (%)") +
+  stat_function(fun = func, colour = 'black') +
+  theme_bw()
+
+```

@@ -1,0 +1,197 @@
+---
+title: "5. Modelos lineales generalizados para datos categóricos"
+subtitle: "Tarea-examen 1: Aprendizaje estadístico supervisado"
+author: "Carlos Iván Canto Varela, 315649888"
+output: pdf_document
+header-includes:
+- \usepackage[spanish]{babel}
+- \usepackage{multirow}
+- \usepackage{amsmath}
+- \decimalpoint
+---
+
+```{r include = FALSE}
+
+# Preparamiento del environment.
+
+rm(list = ls(all.names = TRUE))
+gc()
+
+library(ggplot2)
+library(tidyverse)
+library(VGAM)
+library(vcd)
+
+# Preprocesamiento de los datos.
+
+setwd("C:/Users/calei/Documents/Programming/R/AEA/Tx1")
+Data = read.csv("Preg5.csv")
+
+Data$Sat = factor(Data$Sat, levels = c('Low', 'Medium', 'High'))
+Data$Infl = factor(Data$Infl, levels = c('Low', 'Medium', 'High'))
+Data$Type = factor(Data$Type)
+Data$Cont = factor(Data$Cont, levels = c('Low', 'High'))
+str(Data)
+
+# Dataframe de frecuencias relativas.
+
+relFreqData = Data %>% group_by(Infl, Type, Cont, Sat) %>% summarise(total = sum(n())) %>%
+group_by(Infl, Type, Cont) %>%
+summarise(Sat, relFreq = total / sum(total))
+
+```
+
+La visualización inicial de las frecuencias relativas para los niveles de satisfacción se puede apreciar con una pared de ladrillos (gráfico de mosaico).
+
+```{r echo = FALSE, fig.cap = "Gráfico de mosaico para las frecuencias relativas en los niveles de satisfacción por combinación", out.width = "85%", fig.align = 'center'}
+
+# Plot mosaico para las categorías.
+
+tab = xtabs(relFreq ~ Infl + Type + Cont + Sat, data = relFreqData)
+mosaic(data = tab, ~ Infl + Type + Cont + Sat, labeling = labeling_values, abbreviate_labs = c(6, 9, 4, 6), rot_labels = c(0, 0, 45, 90), gp = gpar(fill = c("#880808")), main = "Frecuencias relativas de satisfacción", gp_labels = gpar(fontsize = 11))
+
+```
+
+El grupo que muestra más satisfacción es el de las torres, mientras que los más miserables son los que escogieron vivir en terraza. Se observa una tendencia donde a mayor nivel de influencia sobre el mantenimiento, mayor satisfacción y viceversa. También parece darse para el contacto con inquilinos; hasta en aquellos de la categoría \textit{Tower}.
+
+Uno asumiría que si alguien se muda a una torre es porque preferiría estar solo; sé que si yo lo hiciera y tuviera vecinos estaría profundamente insatisfecho con el arrendador.
+
+Con estos datos, el interés es ajustar un modelo logístico multinomial.
+
+```{r include = FALSE}
+
+# Ajuste de modelos multinomiales.
+
+glmFit1 = vglm(Sat ~ Infl*Cont*Type, family = multinomial(refLevel = "Low"), data = Data) # Con interacciones
+glmFit = vglm(Sat ~ Infl + Cont+ Type, family = multinomial(refLevel = "Low"), data = Data) # Sin interacciones.
+
+# Summaries.
+
+coef(glmFit1, matrix = TRUE)
+coef(glmFit, matrix = TRUE)
+
+# Medidas de efectividad.
+
+AIC(glmFit1)
+AIC(glmFit)
+
+BIC(glmFit1)
+BIC(glmFit)
+
+```
+
+En primera instancia, un modelo sin interacciones tiene mejores criterios que uno con todas las interacciones entre categorías:
+
+\begin{center}
+\begin{tabular}{|c||c|c|}
+\hline
+\multicolumn{3}{|c|}{Puntajes por modelo} \\
+\hline \hline
+\textbf{Modelo} & \textbf{Puntaje AIC} & \textbf{Puntaje BIC}\\
+\hline
+Con interacciones & 3527.422 & 3787.925 \\
+\hline
+Sin interacciones & \textbf{3498.084} & \textbf{3574.064}\\
+\hline
+\end{tabular}
+\end{center}
+
+Similarmente, la prueba de hipótesis para comprobar la plausibilidad del modelo señaló una ausencia de evidencia para rechazar que el modelo reducido sea inútil con un valor $p$ mayor a 0.05.
+
+```{r echo = FALSE}
+
+# Prueba de hipótesis para modelos anidados.
+
+anova(glmFit1, glmFit, test = 'LRT', type = 'I')
+
+```
+
+Este par de aseveraciones es suficiente para trabajar únicamente con el modelo reducido. Sin embargo, se puede hallar un modelo logístico acumulativo al considerar ordinal a la variable de satisfactibilidad.
+
+```{r include = FALSE}
+
+# Ajuste de modelos logísticos acumulativos.
+
+glmAcFit1 = vglm(Sat ~ Infl + Cont+ Type, family = cumulative(parallel = FALSE), data = Data)
+glmAcFit = vglm(Sat ~ Infl + Cont+ Type, family = cumulative(parallel = TRUE), data = Data)
+
+# Summaries.
+
+coef(glmAcFit1, matrix = TRUE)
+coef(glmAcFit, matrix = TRUE)
+
+# Medidas de efectividad.
+
+AIC(glmAcFit1)
+AIC(glmAcFit)
+
+BIC(glmAcFit1)
+BIC(glmAcFit)
+
+```
+
+Similarmente, se verá la factibilidad de dos modelos distintos:
+
+\begin{center}
+\begin{tabular}{|c||c|c|}
+\hline
+\multicolumn{3}{|c|}{Puntajes por modelo} \\
+\hline \hline
+\textbf{Modelo} & \textbf{Puntaje AIC} & \textbf{Puntaje BIC}\\
+\hline
+Regular & 3498.579 & 3574.559 \\
+\hline
+Con supuesto de proporcionalidad & \textbf{3495.149} & \textbf{3538.566}\\
+\hline
+\end{tabular}
+\end{center}
+
+y con la prueba para el modelo anidado (con supuesto de probabilidad):
+
+```{r echo = FALSE}
+
+# Prueba de hipótesis para modelos anidados.
+
+anova(glmAcFit1, glmAcFit, test = 'LRT', type = 'I')
+
+```
+
+se concluye -con una significancia del 5\%- que el modelo con probabilidades proporcionales es de mayor utilidad entre estos dos. Este es inclusive mejor que el logístico multinomial al reducir por 3 puntos el criterio AIC y por 36 al BIC; lo que es de gran conveniencia porque tiene menos parámetros.
+
+Finalmente, se tienen las probabilidades de nivel de satisfacción para cada caso estimadas por el modelo:
+
+```{r echo = FALSE, fig.align="center"}
+
+# Estimación de las probabilidades con el modelo.
+
+combs = unique(Data[,3:5]) %>% arrange(Infl, Type, Cont)
+probs = predict(glmAcFit, combs, type = "response")
+
+# Dataframe con las probabilidades indicadas por combinación.
+
+(Final = data.frame(combs, probs))
+
+```
+
+Como era de esperarse, las probabilidades encontradas tienen bastante parecido con las frecuencias relativas, de modo que las interpretaciones iniciales siguen siendo mayoritariamente válidas. Sin embargo, los nuevos ajustes implican que el gráfico de mosaico ya no es tan preciso. Esta tabla puede puede ser difícil de interpretar y no agradable a la vista. En vez de eso, es más intuitivo analizar casos concretos.
+
+Por ejemplo, el efecto que se observa al considerar la variable \textit{Infl} cuando se asume que la persona renta una vivienda tipo \textit{Tower} y tiene un nivel de contacto \textit{Low} con otros inquilinos se puede ver de manera clara en el siguiente gráfico.
+
+```{r echo = FALSE, fig.cap = "Probabilidades de satisfacción según del modelo al variar la influencia en el mantenimiento", out.width = "85%", fig.align = 'center'}
+
+# Dataframe de apoyo para el plot.
+
+case = Final %>% filter(Type == 'Tower', Cont == 'Low')
+case = case[,c(4, 5, 6)]
+row.names(case) <- c("Low", "Medium", "High")
+case <- t(case)
+
+# Gráfica de barras gótica para las probabilidades.
+
+xx = barplot(case, beside = TRUE, main = 'Probabilidad de satisfacción', xlab = "Influencia en el mantenimiento de la torre", ylab = 'Probabilidad', las = 1, col = c('black', "#880808","#280137"), ylim = c(0,.75))
+legend('top', legend = rownames(case), bty ='n', fill = c('black', "#880808","#280137"))
+text(x = xx, y = case, pos = 3, cex = 1, col = c('black', "#880808","#280137"), label = round(case, 3))
+
+```
+
+Puede verse que a mayor influencia en el mantenimiento de la torre, la probabilidad de satisfacción alta aumenta, mientras que las de satisfacción baja y media disminuyen. Sin embargo, la de media parece hacerlo de forma mucho más tenue.
