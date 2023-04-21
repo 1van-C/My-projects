@@ -25,4 +25,4 @@ El primer paso fue definir la función principal a utilizar. Se denominó color 
 
 ##	Notas adicionales
 
-El juez en línea requería –por alguna razón fuera de las instrucciones- que se imprimiera el color rojo (vermelho en portugués) cuando no hubiera líneas de entrada que analizar. También decidió necesario que se tomen en cuenta valores complejos (raíz de un número negativo) e indeterminaciones (raíz de una división sobre cero) y se les asigne la invisibilidad (invisivel en portugués). La versión para entrega está comentada, en contraste con la versión de Beecrowd donde no se incluyeron anotaciones para una mayor conveniencia al corregir los errores presentes y caprichos del juez; sin embargo, el funcionamiento y escritura del código son los mismos.
+El juez en línea requería –por alguna razón fuera de las instrucciones- que se imprimiera el color rojo (vermelho en portugués) cuando no hubiera líneas de entrada que analizar. También decidió necesario que se tomen en cuenta valores complejos (raíz de un número negativo) e indeterminaciones (raíz de una división sobre cero) y se les asigne la invisibilidad (invisivel en portugués).
