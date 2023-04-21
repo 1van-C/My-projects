@@ -1,9 +1,3 @@
-/**
- * Programa para ordenar un arreglo dado de modo descendiente.
- * @author Ivan C.
- * @version Octubre, 2020.
- */
-
 class Burbuja{
     public static void main(String []args) {
         int temp;
