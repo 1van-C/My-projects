@@ -1,9 +1,3 @@
-/** Ejercicio 3 de la tarea: raíces de una ecuación cuadrática.
- * Aviso: El programa sólo funciona con polinomios de grado dos; en otras
- * palabras, el término A nunca es cero.
- * @author IvanC
- * @version Marzo 2020
- */
 import java.util.Scanner;
 import static java.lang.System.*;
 import static java.lang.Math.*;
