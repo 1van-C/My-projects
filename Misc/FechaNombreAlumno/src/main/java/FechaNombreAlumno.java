@@ -1,8 +1,3 @@
-/**
- * Ejercicio 15: Usar los métodos para experimentar con dos fechas a construir.
- * @author Jordi ENP.
- * @version Apocalipsis (Abril 2020)
- */
 import java.util.Scanner;
 import static java.lang.System.*;
 
