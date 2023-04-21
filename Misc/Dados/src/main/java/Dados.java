@@ -1,9 +1,3 @@
-/**
- * Simulacion de un juego de dados con las especificaciones dadas.
- * @author Ivan C.
- * @version Octubre, 2020.
- */
-
 import java.util.Scanner;
 
 public class Dados {
