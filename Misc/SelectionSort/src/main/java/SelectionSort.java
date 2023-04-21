@@ -1,8 +1,3 @@
-/**
- * Ordenamiento por seleccion que usa el valor maximo en vez del minimo.
- * @author Ivan Canto.
- * @version 20 de octubre.
- */
 public class SelectionSort{
   public static void main (String args[]){
     int[] array = {6,2,20,16,10,44};
