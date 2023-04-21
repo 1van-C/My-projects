@@ -1,3 +1,4 @@
 # Misc.
 
-Proyectos variados de otra índole.
+Otros proyectos de varias índoles.
+Algunos fueron hechos para resolver ejercicios de Beecrowd.
