@@ -1,9 +1,3 @@
-/**
- * Validacion de datos para las cuentas de Twitter.
- * @author Ivan Canto
- * @version Practica 02
- */
-
 import java.util.Scanner;
 
 public class PruebaTwitter{
