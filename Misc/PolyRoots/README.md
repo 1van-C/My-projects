@@ -1,5 +1,3 @@
-Carlos Iván Canto Varela
-
 # PolyRoots
 
 Programa para calcular las raíces de una ecuación cuadrática.
