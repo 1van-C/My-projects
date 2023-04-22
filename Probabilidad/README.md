@@ -1,3 +1,3 @@
 # Probabilidad
 
-Proyectos relacionados a procesos estocásticos y simulaciones.
+Proyectos relacionados a probabilidad, procesos estocásticos y simulaciones.
