@@ -1,5 +1,3 @@
-Carlos Iván Canto Varela
-
 # Sten
 # Esteganografía por LSB
 
