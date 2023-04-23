@@ -1,0 +1,221 @@
+---
+title: "Regresión lineal múltiple"
+author: "Carlos Iván Canto Varela"
+output: pdf_document
+header-includes:
+- \usepackage[spanish]{babel}
+---
+
+```{r include = FALSE}
+
+# Preparamiento del environment.
+
+rm(list = ls(all.names = TRUE))
+gc()
+
+library(ggplot2)
+library(tidyverse)
+library(car)
+library(broom)
+library(tseries)
+library(multcomp)
+
+# Preprocesamiento de los datos.
+
+setwd("My/Very/Personal/Path")
+Data = read.csv("Preg1A.csv")
+
+Data$sex = factor(Data$sex)
+str(Data)
+
+```
+
+Los datos proporcionados tienen la visualización siguiente:
+
+```{r echo = FALSE, fig.cap = "Diagramas de dispersión por covariable", figures-side, fig.show = "hold", out.width = "50%"}
+
+# Diagramas de dispersión iniciales.
+
+ggplot(data = Data,
+       mapping = aes(x = bmi, y = bpsystol, color = sex)) + 
+  geom_point(size = 1) +
+  scale_color_brewer(palette = "Set1") +
+  labs(title = "Presión sistólica según BMI y sexo",
+       x = "Índice de masa corporal",
+       y = "Presión arterial sistólica") +
+  theme_bw()
+ggplot(data = Data,
+       mapping = aes(x = age, y = bpsystol, color = sex)) + 
+  geom_point(size = 1) +
+  scale_color_brewer(palette = "Set1") +
+  labs(title = "Presión sistólica según edad y sexo",
+       x = "Edad",
+       y = "Presión arterial sistólica") +
+  theme_bw()
+
+```
+
+La intención es ajustar un modelo de regresión lineal múltiple sin interacciones.
+
+```{r include = FALSE}
+
+# Ajuste del modelo de regresión lineal múltiple.
+
+lmFit = lm(bpsystol ~ bmi + age + sex, data = Data)
+summary(lmFit)
+
+```
+
+Con este, un interés primario es verificar el supuesto de linealidad:
+
+```{r echo = FALSE, results = FALSE, fig.cap = "Gráficas de residuales para el supuesto de linealidad", out.width = "65%", fig.align = 'center'}
+
+# Diagramas para verificar la linealidad.
+
+residualPlots(lmFit)
+
+```
+
+Se aprecia que se cumple. Sin embargo, otro tipo de modelo lineal podría ser de mayor utilidad pues los diagramas de dispersión parecen apuntar hacia la no homocedasticidad.
+
+```{r include = FALSE}
+
+# Pruebas del supuesto de homocedasticidad.
+
+ncvTest(lmFit)
+ncvTest(lmFit, ~ bmi)
+ncvTest(lmFit, ~ age) # El p-value se rechaza en el grupo de la edad: mala señal para el supuesto.
+
+```
+
+Similarmente, la normalidad no pinta bien con el diagrama Q-Q en las colas:
+
+```{r echo = FALSE, fig.cap = "Gráfica Q-Q para el supuesto de normalidad", out.width = "65%", fig.align = 'center'}
+
+# Gráfica para verificar la normalidad.
+
+plot(lmFit,2)
+
+```
+
+Para arreglar los supuestos erróneos, se procede a hacer una tranformación Box-Cox.
+
+```{r include = FALSE}
+
+# Ajuste de parámetro con transformación Box-Cox.
+
+summary(powerTransform(lmFit)) # No se puede rechazar que lambda sea 0 con significancia de 0.05. Se procede a realizar la variante. logarítmica.
+
+# Adaptación de variable según la transformación.
+
+Data$bpsystolBC = log(Data$bpsystol)
+
+# Ajuste del nuevo modelo.
+
+lmBCFit = lm(bpsystolBC ~ bmi + age + sex, data = Data)
+summary(lmBCFit)
+
+```
+
+Con el nuevo modelo ajustado, los supuestos fallidos regresan a ser válidos con significancia de 0.05,
+
+```{r echo = FALSE, fig.cap = "Gráfica Q-Q para el supuesto de normalidad en el modelo transformado", out.width = "65%", fig.align = 'center'}
+
+# Verificación de supuestos.
+
+# Homocedasticidad.
+ncvTest(lmBCFit)
+ncvTest(lmBCFit, ~ bmi)
+ncvTest(lmBCFit, ~ age)
+
+# Normalidad.
+plot(lmBCFit,2)
+BCData = augment(lmBCFit)
+shapiro.test(BCData$.std.resid)
+#nortest::lillie.test(BCData$.std.resid)
+#jarque.bera.test(BCData$.std.resid)
+
+```
+
+y se mantiene la linealidad.
+
+```{r echo = FALSE, results = FALSE, fig.cap = "Gráficas de residuales para el supuesto de linealidad en el modelo transformado", out.width = "65%", fig.align = 'center'}
+
+# Gráfica de residuos para el supuesto de linealidad.
+
+residualPlots(lmBCFit)
+
+```
+
+\pagebreak
+
+Para encontrar una asociación entre alta presión arterial sistólica y un índice de masa corporal elevado, es necesario realizar una prueba de hipótesis. Sea $y^* = \ln(y)$, el modelo escogido tendrá la forma
+
+\[\text{E}\left[y^*\right] = \beta_0 + \beta_1\text{bmi} + \beta_2\text{age} + \beta_3\text{sex}_{2}\]
+
+donde el nivel base para la variable categórica sex es el 1. Así la prueba buscada es
+
+\[H_0: \quad \beta_1 \leq 0 \quad \text{vs.} \quad H_a: \quad \beta_1 > 0.\]
+
+```{r echo = FALSE}
+
+# Prueba de hipótesis por multcomp.
+
+m = c(0)
+K = matrix(c(0, 1, 0, 0), ncol = 4, nrow = 1)
+summary(glht(lmBCFit, linfct = K, rhs = m, alternative = "greater"))
+
+```
+
+Dado que el valor $p$ encontrado es menor a una significancia del 5\%, hay suficiente evidencia para rechazar la hipótesis nula y asumir que tener un índice de masa corporal alto se asocia con una alta presión arterial sistólica.
+
+Como complemento -para las edades de 30, 50 y 64 años- se asocian las siguientes curvas:
+
+```{r echo = FALSE, fig.cap = "Modelo relacional de presión arterial sistólica con IMC para tres edades particulares", fig.show = "hold", out.width = "50%"}
+
+# Funciones de los coeficientes para graficar los modelos.
+# La exponencial viene del despeje por la tranformación Box-Cox.
+
+funBC30s1 = function(x) {exp(lmBCFit$coef[1] + lmBCFit$coef[2]*x + lmBCFit$coef[3]*30)}
+funBC30s2 = function(x) {exp(lmBCFit$coef[1] + lmBCFit$coef[2]*x + lmBCFit$coef[3]*30 + lmBCFit$coef[4])}
+
+funBC50s1 = function(x) {exp(lmBCFit$coef[1] + lmBCFit$coef[2]*x + lmBCFit$coef[3]*50)}
+funBC50s2 = function(x) {exp(lmBCFit$coef[1] + lmBCFit$coef[2]*x + lmBCFit$coef[3]*50 + lmBCFit$coef[4])}
+
+funBC64s1 = function(x) {exp(lmBCFit$coef[1] + lmBCFit$coef[2]*x + lmBCFit$coef[3]*64)}
+funBC64s2 = function(x) {exp(lmBCFit$coef[1] + lmBCFit$coef[2]*x + lmBCFit$coef[3]*64 + lmBCFit$coef[4])}
+
+Datas1 = Data %>% filter(sex == 1)
+Datas2 = Data %>% filter(sex == 2)
+
+# Gráficas finales.
+
+ggplot(data = Datas1,
+       mapping = aes(x = bmi, y = bpsystol)) + 
+  geom_point(size = 1, color = '#880808') +
+  labs(title = "Presión sistólica según IMC (BMI) para sexo 1",
+       x = "Índice de masa corporal",
+       y = "Presión arterial sistólica") +
+  stat_function(fun = funBC30s1, aes(colour = "30 años")) +
+  stat_function(fun = funBC50s1, aes(colour = "50 años")) +
+  stat_function(fun = funBC64s1, aes(colour = "64 años")) +
+  scale_colour_manual("Edades:", values = c("red", "blue", "darkgreen")) +
+  theme_bw()
+
+ggplot(data = Datas2,
+       mapping = aes(x = bmi, y = bpsystol)) + 
+  geom_point(size = 1, color = '#880808') +
+  labs(title = "Presión sistólica según IMC (BMI) para sexo 2",
+       x = "Índice de masa corporal",
+       y = "Presión arterial sistólica") +
+  stat_function(fun = funBC30s2, aes(colour = "30 años")) +
+  stat_function(fun = funBC50s2, aes(colour = "50 años")) +
+  stat_function(fun = funBC64s2, aes(colour = "64 años")) +
+  scale_colour_manual("Edades:", values = c("red", "blue", "darkgreen")) +
+  theme_bw()
+
+```
+
+A primera instancia, los puntos no parecen estar explicados por las rectas en la escala original. Sin embargo, es importante recordar que éstas sólo representan tres de todas las edades muestreadas.
+
+Todas las rectas son crecientes; esto apoya gráficamente a la prueba de hipótesis realizada previamente. Además se percibe un paralelismo entre las rectas para cada edad hallada, pero con valores más altos conforme a mayores edades en ambos sexos. Esto es un indicador para una hipótesis análoga a la probada, pero con las edades.
