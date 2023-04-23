@@ -1,3 +1,3 @@
 # Estadística
 
-Los proyectos presentes tratan el análisis de distintos tipos de datos mediante varios modelos lineales generalizados.
+Los proyectos presentes tratan el análisis de distintos tipos de datos por modelos lineales generalizados.
