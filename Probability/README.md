@@ -1,3 +1,6 @@
-# Probabilidad
+# Probability
 
-Proyectos relacionados a probabilidad, procesos estocásticos y simulaciones.
+Projects related to probability, stochastic processes, and simulations.
+Mostly in Spanish.
+
+#

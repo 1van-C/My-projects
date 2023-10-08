@@ -1,20 +1,27 @@
 # Time
 
-## Descripción
+## Description
 
-Programa para calcular la duración de un juego con dos horas como entrada.
+Program to compute the duration of a game given two times.
 
-## Prerrequisitos
+## Prerrequisites
 
-Se necesita tener Java (versión 14 en adelante) con el JDK de OpenJDK. Las paqueterías utilizadas vienen por defecto en la instalación inicial del JDK.
+Java (version 14 and onwards) is needed, with OpenJDK's JDK. The used libraries come by default in the initial installation of the JDK.
 
-## Ejecución
+## Execution
 
-El primer paso es descargar la carpeta en un directorio elegido. Luego, en la terminal (Windows), se utilizará el comando
-    cd path="directorio\de\la\carpeta".
-Es crucial asegurarse que el directorio contiene el archivo Time.java. El siguiente y último paso es ejecutar el programa con el comando
+The first step is to download the floder in a chosen directory. Then, at the Windows terminal, use the command
+    cd path="directory\of\the\folder".
+It is imperative to make sure that the directory contains the file Time.java. The next and last step is to execute it with the command
     java Time.java
-El resultado final no se visualizará pues fue construido con la implementación de Beecrowd en mente.
+The final result wont appear since it was built for the Beecrowd reader.
+
+## Operation
+
+TBD
+
+
+
 
 # Funcionamiento 
 

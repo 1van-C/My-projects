@@ -1,3 +1,5 @@
-# Dados
+# Dice
 
-Simulacion de un juego de dados con ciertas especificaciones comentadas.
+Simulation of a game of dice with certain commented specifications.
+
+#

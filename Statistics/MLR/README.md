@@ -1,3 +1,5 @@
 # MLR
 
-Se analiza la presión arterial sistólica con varias otras características de los pacientes mediante regresión lineal múltiple.
+Analysis of systolic arterial pressure with various other characteristics in patients using multiple linear regression.
+
+#

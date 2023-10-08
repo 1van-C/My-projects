@@ -1,3 +1,5 @@
 # CountDataGLM
 
-Analiza los casos de cáncer de pulmón en ciertas ciudades europeas mediante modelos generalizados de conteo.
+Analysis of the number of lung cancer cases in certain European cities using generalized counting models.
+
+#

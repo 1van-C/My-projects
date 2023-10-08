@@ -1,3 +1,5 @@
 # ContDataGLM
 
-Utiliza los mismos datos de MLR pero itera miles de posibilidades de modelos lineales generalizados continuos para encontrar el mejor ajuste.
+Uses the same data as MLR, but goes through thousands of different continuous generalized linear models to find the best fit.
+
+#

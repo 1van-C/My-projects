@@ -1,3 +1,5 @@
 # CatDataGLM
 
-Se analizan las probabilidades de satisfacción con variables nominales de vivienda mediante modelos multinomiales.
+Analysis of the possibilities of satisfaction with categorical variables of living conditions using multinomial models.
+
+#
