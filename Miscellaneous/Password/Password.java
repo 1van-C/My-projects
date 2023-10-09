@@ -1,8 +1,8 @@
 /**
- * Detección de contraseñas válidas en la entrada mediante regex.
+ * Password validation with RegEx.
  * @author Carlos Iván Canto Varela
  * @version Final
- * @return Void, pero imprime el veredicto.
+ * @return Void, but it prints the verdict.
  */
 
 import java.io.BufferedReader;

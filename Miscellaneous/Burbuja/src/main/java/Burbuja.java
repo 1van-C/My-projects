@@ -15,7 +15,7 @@ class Burbuja{
             ciclos += 1;
         }
 
-        System.out.println("El arreglo en orden descendiente, despues de " + ciclos + " iteraciones, es:"); 
+        System.out.println("The array in descending order, after " + ciclos + " iterations, is: "); 
         for (int i:arreglo)
             System.out.println(i);
         }

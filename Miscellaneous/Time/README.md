@@ -14,15 +14,12 @@ The first step is to download the floder in a chosen directory. Then, at the Win
     cd path="directory\of\the\folder".
 It is imperative to make sure that the directory contains the file Time.java. The next and last step is to execute it with the command
     java Time.java
-The final result wont appear since it was built for the Beecrowd reader.
+The final result won't appear since it was built for the Beecrowd reader.
 
 ## Operation
 
-TBD
+A BufferedReader reader was constructed to deal with Beecrowd's input format. A while loop was also implemented to run the program as long as the is a new line on the input.
+Since the entry is a string with four numbers (two for the time and two for the minutes), each number is converted to an integer and stored in a list. Then, a series of comparisons are done with the initial and final times to determine the operation to realize. After comparing hours, the minutes follow and, according to each case, a value is assigned to the hours and minutes variables. Using a defined algorithm, these contain the final value of the hours and minutes that the game in question lasted.
+Finally, the previous variables are converted to strings and it prints the output: "O JOGO DUROU " + hours + " HORA(S) E " + minutes + " MINUTO(S)", as the Beecrowd requirements state.
 
-
-
-
-# Funcionamiento 
-
-Se construyó un lector BufferedReader de la clase homónima para tratar los datos con el formato de entrada de Beecrowd; también se implementó un bucle while que corre el programa siempre y cuando haya una línea nueva en la entrada Ya que la entrada es en forma de una cadena con cuatro números (dos para la hora y dos para los minutos), se toma cada número, se convierte a clase entero y se ingresa en una lista. Luego, una serie de comparaciones se hacen sobre las horas iniciales y finales (primera y tercera entrada en la lista) para determinar la operación a realizar. Después de comparar las horas, se comparan los minutos y, según el caso, se les asigna un valor a las variables hours y minutes. Estas, mediante una operación a definir por las comparaciones ya mencionadas, contienen el valor final de las horas y minutos que llevó el juego en cuestión. Finalmente, las variables anteriores son convertidas a cadenas y se imprime "O JOGO DUROU " + hours + " HORA(S) E " + minutes + " MINUTO(S)" según los requisitos de Beecrowd.
+#

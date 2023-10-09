@@ -3,21 +3,21 @@ from PIL import Image
 
 
 def Cod(src, mens, dest, llave):
-    """ Función para codificar un mensaje en una imagen.
+    """ Function to codify a message inside an image.
 
     Args:
-        src (string): nombre de la imagen a codificar.
-        mens (string): mensaje a incluir.
-        dest (string): nombre a usar para la imagen cofidicada.
-        llave (string): clave a utilizar para la codificación.
+        src (string): Name of the image to use.
+        mens (string): Message to include.
+        dest (string): Name to use for the codified image.
+        llave (string): Key to use for the process.
 
     Raises:
-        Exception: excepción utilizada para asegurarse que el usuario referencíe una imagen con formato png.
-        Exception: excepción para denotar que la imagen es insuficiente para el mensaje ingresado.
+        Exception: Exception to make sure that the user references a png image.
+        Exception: Exception to let the user know that the image is too small for the intended message.
     """
 
     if(src.partition(".")[2] != "png"):
-        raise Exception("La imagen a codificar debe tener formato png.")
+        raise Exception("You must use a png image.")
 
     img = Image.open(src, 'r')
     width, height = img.size
@@ -37,7 +37,7 @@ def Cod(src, mens, dest, llave):
     pix_req = len(b_mens)
     
     if (pix_req > pix_tot):
-        raise Exception("Incompatibilidad: se necesita una imagen con más pixeles o un mensaje con menos caracteres.")
+        raise Exception("Incompatibility error. You need an image with more pixels or a message with less characters.")
 
     else:
         index = 0
@@ -50,31 +50,31 @@ def Cod(src, mens, dest, llave):
         array = array.reshape(height, width, n)
         img_cod = Image.fromarray(array.astype('uint8'), img.mode)
         img_cod.save(dest)
-        print("Mensaje codificado.")
+        print("Message codified.")
 
 
 def Decod(src, llave, dest):
-    """ Función para decodificar mensajes ocultos en imágenes png.
+    """ Function to decodify messages hidden in png images.
 
     Args:
-        src (string): nombre de la imagen a decodificar.
-        llave (string): clave a utilizar para la decodificación.
-        dest (string): nombre del archivo de texto (.txt) donde se guardará el mensaje decriptado.
+        src (string): Name of the image to use.
+        llave (string): Key to use for the process.
+        dest (string): Name of the txt file where the decrypted message will be stored.
 
     Raises:
-        Exception: excepción utilizada para asegurarse que el usuario referencíe una imagen con formato png.
+        Exception: Exception to make sure that the user references a png image.
 
     Returns:
-        string: Mensaje decriptado.
-        None: No regresa nada cuando no encuentra un mensaje.
+        string: Decrypted message.
+        None: Returns nothing if it can't find a message.
     """
 
 
     if(src.partition(".")[2] != "png"):
-        raise Exception("La imagen a decodificar debe tener formato png.")
+        raise Exception("It must be a png image.")
 
     if(dest.partition(".")[2] != "txt"):
-        raise Exception("El archivo destino debe tener formato txt.")
+        raise Exception("You must use a txt file.")
 
     img = Image.open(src, 'r')
     array = np.array(list(img.getdata()))
@@ -102,7 +102,7 @@ def Decod(src, llave, dest):
             mens += chr(int(bits_oc[i], 2))
 
     if llave in mens:
-        print("El mensaje oculto se guardó en el archivo.")
+        print("The hidden message was stored in the txt file.")
         with open(dest, 'w', encoding='utf-8') as f:
             f.write(mens[:-len(llave)])
             f.close
@@ -110,30 +110,30 @@ def Decod(src, llave, dest):
         
         
     else:
-        print("No se encontró un mensaje en la imagen.")
+        print("A message wasn't found in the image.")
         return
 
 
 def Stego():
-    """ Función main para correr el programa y conseguir las variables del usuario.
+    """ Main function to run the program and get the user's variables.
     """
 
-    opt = input("Bienvenido. Ingresa h si quieres encriptar o u si quieres decifrar.\n")
+    opt = input("Welcome. Write [h] if you would like to encrypt or [u] if you would like to decrypt a message.\n")
 
     while opt not in ["h", "u"]:
-        opt = input("Opción inválida. Ingresa h si quieres encriptar o u si quieres decifrar.\n")
+        opt = input("Invalid option. Write [h] if you would like to encrypt or [u] if you would like to decrypt.\n")
 
     if opt == 'h':
-        src = input("Ingresa el nombre de la imagen a utilizar con su formato (.png).\n")
-        mens = input("Ingresa el mensaje a encriptar.\n")
-        dest = input("Ingresa el nombre de la imagen resultante con su formato (png).\n")
-        key = input("Ingresa la llave a usar para el encriptado. Asegúrate que no se encuentre en el mensaje a encriptar.\n")
+        src = input("Write the name of the image to use with it's format (.png).\n")
+        mens = input("Write the message to encrypt.\n")
+        dest = input("Write the name of the resulting image with it's format (png).\n")
+        key = input("Write the key to use for the encryption. Make sure it is not present in the message to encrypt.\n")
         Cod(src, mens, dest, key)
 
     elif opt == 'u':
-        src = input("Ingresa el nombre de la imagen a utilizar con su formato (.png).\n")
-        key = input("Ingresa la llave a usar para el decriptado.\n")
-        dest = input("Ingresa el nombre del archivo en el que se guardará el texto con su formato (.txt).\n")
+        src = input("Write the name of the image to use with it's format (.png).\n")
+        key = input("Write the key to use for the encryption. Make sure it is not present in the message to encrypt.\n")
+        dest = input("Write the name of the file where the text will be stored with it's format (.txt).\n")
         Decod(src, key, dest)
 
 

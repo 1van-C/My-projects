@@ -7,34 +7,33 @@ public class PoliRaices {
         Scanner lector = new Scanner(System.in);
         double a, b, c;
         double raiz1, raiz2;
-        System.out.println("Se calcularán las raíces de un polinomio de forma"
-            + " Ax^2 + Bx + C.");
-        System.out.println("Escribe el término A:");
+        System.out.println("The roots of a polynomial Ax^2 + Bx + C will be computed.");
+        System.out.println("Write the A term:");
         a = lector.nextDouble();
-        System.out.println("Escribe el término B:");
+        System.out.println("Write the B term:");
         b = lector.nextDouble();
-        System.out.println("Escribe el término C:");
+        System.out.println("Write the C term:");
         c = lector.nextDouble();
         double det = Math.pow(b,2)-4*a*c;
 
-        // Raíces reales
+        // Real roots.
         if(det > 0){
             raiz1 = (-b + Math.sqrt(det))/(2*a);
             raiz2 = (-b - Math.sqrt(det))/(2*a);
-            System.out.print("Tus raíces son: " + raiz1 + " y " + raiz2 + ".");
+            System.out.print("The roots are: " + raiz1 + " y " + raiz2 + ".");
         }
 
-        // Raíces iguales
+        // Matching roots.
         else if(det == 0){
             raiz1 = raiz2 = -b/(2*a);
-            System.out.print("Tu raíz es: " + raiz1 + ".");
+            System.out.print("The roots are: " + raiz1 + ".");
         }
 
-        // Raíces complejas
+        // Complex roots.
         else {
             double real = -b/(2*a);
             double imag = Math.sqrt(-det)/(2*a);
-            System.out.print("Tus raíces son: " + real + " + " + imag + "i y " +
+            System.out.print("The roots are: " + real + " + " + imag + "i y " +
                 real + " - " + imag + "i .");
         }
     }    

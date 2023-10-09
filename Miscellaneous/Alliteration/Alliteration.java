@@ -1,8 +1,8 @@
 /**
- * Detección de aliteraciones en input.
+ * Detection of alliterations on an input.
  * @author Carlos Iván Canto Varela
  * @version Final
- * @return Void, pero imprime las aliteraciones por línea de input.
+ * @return Void, but prints the alliterations per line of input.
  */
 
 import java.io.BufferedReader;

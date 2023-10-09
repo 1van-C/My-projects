@@ -1,21 +1,24 @@
 # Password
 
-## Descripción
+## Description
 
- Es un programa para validar contraseñas. Se asegura que estas lleven al menos una letra mayúscula, una minúscula y un número; además debe tener entre 6 a 32 caracteres y no llevar ningún carácter especial (puntuación, acentos o espacios).
+Program to validate passwords. It makes sure that they contain, at least, an upwer and lower case letter and a number. It also must be between 6 to 32 characters and not have a special character (punctuation marks, accents or spaces).
 
-## Prerrequisitos
+## Prerrequisites
 
-Se necesita tener Java (versión 14 en adelante) con el JDK de OpenJDK. Las paqueterías utilizadas vienen por defecto en la instalación inicial del JDK.
+Java (version 14 and onwards) is needed, with OpenJDK's JDK. The used libraries come by default in the initial installation of the JDK.
 
-## Ejecución
+## Execution
 
-El primer paso es descargar la carpeta en un directorio elegido. Luego, en la terminal (Windows), se utilizará el comando
-    cd path="directorio\de\la\carpeta".
-Es crucial asegurarse que el directorio contiene el archivo Password.java. El siguiente y último paso es ejecutar el programa con el comando
-    java Password.java
-El resultado final no se visualizará pues fue construido con la implementación de Beecrowd en mente.
+The first step is to download the floder in a chosen directory. Then, at the Windows terminal, use the command
+    cd path="directory\of\the\folder".
+It is imperative to make sure that the directory contains the file Time.java. The next and last step is to execute it with the command
+    java Time.java
+The final result won't appear since it was built for the Beecrowd reader.
 
-## Funcionamiento 
+## Operation
 
-Primero se construye un método para comparar dos cadenas mediante expresiones regulares (regex). La cadena modelo se construyó para tener una letra mayúscula, una minúscula y un decimal. Además, se filtró de modo que sólo acepte este tipo de caracteres. Este método se denominó validatePassword. Después, se construyó un lector BufferedReader de la clase homónima para tratar los datos con el formato de entrada de Beecrowd. Se implementó un bucle while que corre el programa siempre y cuando haya una línea nueva en la entrada. Cada una de estas líneas es comparada con el método definido anteriormente y, mediante un if, si la línea está en el formato deseado se imprime la frase “Senha valida.” De otra forma, se imprime “Senha invalida.” Esto se hace para cada línea ingresada por Beecrowd.
+First, a method is built to compare two string using ReGex. The model string was built to have an upper and lower case letter and a decimal. It is also built so it only accepts this type of characters. The method was named validatePassword.
+Then, a BufferedReader reader was constructed to deal with Beecrowd's input format. A while loop was also implemented to run the program as long as the is a new line on the input. Each one of these lines is compared with the method and, if the line has the required format, the phrase "Senha valida." is printed. Otherwise, it prints "Senha invalida.". This is done for each line in the input.
+
+#

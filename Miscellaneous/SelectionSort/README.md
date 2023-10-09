@@ -1,3 +1,5 @@
 # SelectionSort
 
-Ordenamiento por selección que usa el valor máximo en vez del mínimo.
+Sorting via selection that uses the maximum value instead of the minimum.
+
+#

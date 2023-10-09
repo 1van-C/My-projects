@@ -6,44 +6,40 @@ public class FechaCorrecta {
         Scanner lector = new Scanner(System.in);
         int d, m;
         long a;
-        System.out.println("Se verificará si cualquier fecha de formato "
-                + "DD/MM/AAAA ingresada es válida.");
-        System.out.println("Escribe el día: ");
+        System.out.println("The validity of a date with format DD/MM/YYYY will be checked.");
+        System.out.println("Write the day: ");
         d = lector.nextInt();
-        System.out.println("Escribe el mes: ");
+        System.out.println("Write the month: ");
         m = lector.nextInt();
-        System.out.println("Escribe el año: ");
+        System.out.println("Write the year: ");
         a = lector.nextLong();
         if (d < 1 || m < 1 || a < 1){
-            System.out.println("La fecha es inválida, pedazo de alcornoque."
-                    + " ¿No sabes que no hay dí­as, meses ni años negativos?");
+            System.out.println("The date is invalid. There are no negative days, months or years.");
         }
         else if(m > 12){
-            System.out.println("La fecha es inválida, sólo hay doce meses. Esfúmate.");
+            System.out.println("The date is invalid. There are only 12 months.");
         }
         else if(d > 31){
-            System.out.println("La fecha es inválida, no hay meses con más de 31 dí­as. Tonto.");
+            System.out.println("The date is invalid. No month has more than 31 days.");
         }
         else{
             if (d > 28){
                 if(m == 2){
-                    System.out.println("La fecha es inválida, febrero tiene 28"
-                            + " dí­as. Vuelve a la primaria.");
+                    System.out.println("The date is invalid. February only has 28 days.");
                 }
                 else{
                     if(d > 30){
                         if(m == 4 || m == 6 || m == 9 || m == 11){
-                            System.out.println("La fecha es inválida, ese mes sólo"
-                                    + " tiene 30 días. No quiero verte jamás.");
+                            System.out.println("The date is invalid. Said month only has 30 days.");
                         }
                         else{
-                            System.out.println("La fecha es válida. Bien hecho.");
+                            System.out.println("Date validated.");
                         }                    
                     }
                 }
             }
             else{
-                System.out.println("La fecha es válida. Bien hecho.");
+                System.out.println("Date validates.");
             }
         }
     }    

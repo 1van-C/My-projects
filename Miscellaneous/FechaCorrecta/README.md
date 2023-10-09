@@ -1,3 +1,5 @@
 # Fecha correcta.
 
-Programa para determinar si una fecha ingresada es correcta.
+Program to determine whether an input date is correct.
+
+#

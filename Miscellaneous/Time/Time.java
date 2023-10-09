@@ -1,8 +1,8 @@
 /**
- * Contador de tiempo para la duración de un partido.
+ * Time counter for the duration of a football match.
  * @author Carlos Iván Canto Varela
  * @version Final
- * @return Void, pero imprime la duración del partido por cada línea de input.
+ * @return Void, but prints the match duration for each line of the input.
  */
 
 import java.io.BufferedReader;

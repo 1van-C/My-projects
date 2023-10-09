@@ -1,24 +1,30 @@
 # Sten
-# Esteganografía por LSB
+# LSB Stenography
 
-## Descripción
+## Description
 
-Es un programa que realiza esteganografía básica. Puede ocultar un mensaje en una imagen de o revelar un mensaje oculto en una imagen de acuerdo a una clave con la metodología del bit menos significativo.
+Program that performs basic stenography. It can hide a message in an image or reveal a hidden message in an image using a key, as required by the least significant bit (LSB) methodology.
 
-## Prerrequisitos
+## Prerrequisites
 
-Se necesita tener Python (se utilizó la versión 3.9). Además se requiere haber instalado la paquetería Pillow en el ambiente a utilizar y tener Numpy.
+Python (version 3.9 and onwards) is needed. It also requires the Pillow library and Numpy.
 
-## Ejecución
+## Execution
 
-El primer paso es descargar la carpeta en un directorio elegido. Luego, en la terminal (Windows), se utilizará el comando
-    cd path="directorio\de\la\carpeta".
-Es crucial asegurarse que el directorio contiene el archivo Color.py. El siguiente y último paso es ejecutar el programa con el comando
+The first step is to download the floder in a chosen directory. Then, at the Windows terminal, use the command
+    cd path = "directory\of\the\folder".
+It is imperative to make sure that the directory contains the file Color.py. The next and last step is to execute it with the command
     python Sten.py
-Las opciones a utilizar se verán impresas en la terminal, por lo que el usuario deberá ingresar la información requerida en el formato adecuado.
+The options to choose from will be printed on the terminal, so the user will have to input the required information in the adequate format.
 
-## Funcionamiento 
+## Operation
 
-Se requiere que la imagen a utilizar se encuentre en la misma carpeta que el programa. Así, cuando el usuario ingrese su nombre de la imagen el programa la podrá abrir. Cuando se elige la opción de ocultar un mensaje, el programa abrirá la imagen y procederá a leerla y transformarla en un arreglo; la dimensión de las entradas dependerá si el png soporta los valores RGBA o sólo RGB. Luego, se toma el mensaje a ocultar y se le añade la llave elegida y una llave extra para mayor seguridad estenográfica. Esta cadena se convierte entonces a binario y se calculan los pixeles requeridos para guardar el mensaje. Si la imagen ingresada no tiene los suficientes se alzará una excepción para manejar este error. De otra manera, un iterador midificará el último bit de cada pixel para guardar el mensaje hasta que no falte ningún caracter, incluidas ambas llaves. El arreglo final es entonces utilizado para crear y guardar la imagen con el mensaje oculto en la misma carpeta del programa. El proceso es similar cuando se elige la opción de develar un mensaje. Primero se leen y guardan los pixeles de la imagen elegida en un arreglo, se toma su dimensión (RGB o RGBA) y se calculan los pixeles totales. A cada pixel se le extrae el bit menos significativo y estos se guardan en grupos de ocho. Luego son convertidos en caracteres ASCII y se busca la llave (junto con la llave de seguridad del programa) dentro de la cadena resultante. Una vez encontrada, el programa toma los caracteres a la izquierda de ella y los guarda en un documento de texto (txt) dentro de la carpeta del programa.
+The image to use must be in the same file as the program, so when the user inputs it's name in the image, the program will be able to open it.
 
-Trabajo con base en https://medium.com/swlh/lsb-image-steganography-using-python-2bbbee2c69a2
+When the option to hide a message is selected, the program will open the image, read it and transform it into an array; the dimension of the inputs will depend on whether the png can handle RGBA or just RGB values. Then, the program will open the image and add the chosen key and an extra key for improved stenographic security. This chain will be turned into binary and it will calculate the required pixels to save the message. If the inputed image does not have enough, an exception will be raised to handle such error. Otherwise, an iterator will midify the last bit in each pixel to store the message until every character is covered, including both keys. The final array is used to create and save the image with the hidden message in the same folder.
+
+The process is simmilar when the option to show a message is selected. First, the pixels are processed and stored into an array, then the dimension (RGB or RGBA) is used to calculate the total pixels. Each one of them has the least significant big extracted and these are stored in groups of eight. Then they are converted into ASCII characters and the key, along with the security key, is searched for inside the resulting string. Once found, the program takes the characters ti the left of it and saves them in a txt file inside the folder used.
+
+The program was based on https://medium.com/swlh/lsb-image-steganography-using-python-2bbbee2c69a2
+
+#

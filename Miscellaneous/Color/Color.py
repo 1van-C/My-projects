@@ -1,13 +1,13 @@
 from math import sqrt
 
 def color(x):
-    """Función para determinar el color aparente de una playera según la longitud de onda que se generaría si se llevara puesta a cierta velocidad.
+    """ Function to determine the apparent color of a shirt, according to the wavelength it generates at a certain speed.
 
     Args:
-        x (integer): Velocidad del portador de la camiseta.
+        x (integer): Speed of the wearer of the shirt.
 
     Returns:
-        string: El color de la playera que vería un observador.
+        string: The color of the shirt that would be observed.
     """
     c = 3*10**8
     if x == c or x == -c:

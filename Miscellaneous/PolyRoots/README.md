@@ -1,5 +1,9 @@
 # PolyRoots
 
-Programa para calcular las raíces de una ecuación cuadrática.
+Program to compute the roots of a quadratic equation.
 
-El programa sólo funciona con polinomios de grado dos; en otras palabras, el término A nunca es cero.
+It only works with grade-two polynomials such that for
+    Ax^2 + Bx + C = 0,
+the term A is never zero.
+
+#

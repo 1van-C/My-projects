@@ -1,3 +1,5 @@
 # Burbuja
 
-Programa para ordenar un arreglo dado de modo descendiente.
+Program to sort an array in descending order.
+
+#

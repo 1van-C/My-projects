@@ -19,7 +19,7 @@ public class PruebaTwitter{
         return country.matches("^ANT|ARG|BAH|BAR|BEL|BOL|BRA|CAN|CHI|COL|COS|CUB|DOM|ECU|ELS|GRA|GUA|GUY|HAI|HON|JAM"
                 + "|MEX|NIC|PAN|PAR|PER|REP|SAC|SAV|SAL|SUR|TRI|URU|VEN$");
     }
-    //Los paises permitidos fueron sacados de https://es.wikipedia.org/wiki/América.
+    //The allowed countries come from: https://es.wikipedia.org/wiki/América.
     
     public static boolean validarCorreo(String email){
         return email.matches("^[a-zA-Z0-9_-]+@(gmail|hotmail).com$");
@@ -32,61 +32,61 @@ public class PruebaTwitter{
     public static void main(String[] args){
     
         Scanner input = new Scanner(System.in);
-        System.out.println("Bienvenido a Twitter. Crea tu cuenta a continuacion.");
+        System.out.println("Welcome to Twitter. Create your account.");
         
-        System.out.println("Ingresa tu(s) nombre(s).");
+        System.out.println("Input your name(s).");
         String nombre;
         nombre = input.nextLine();
         while(!validarNombre(nombre)){
-            System.out.println("Ingresa un nombre valido.");
+            System.out.println("Input a valid name.");
             nombre = input.nextLine();
         }
         
-        System.out.println("Ingresa tu(s) apellido(s).");
+        System.out.println("Input your last name(s).");
         String apellido;
         apellido = input.nextLine();
         while(!validarApellido(apellido)){
-            System.out.println("Ingresa un apellido valido.");
+            System.out.println("Input a valid last name.");
             apellido = input.nextLine();
         }
         
-        System.out.println("Ingresa tu fecha de nacimiento en el formato dd/mm/aaaa.");
+        System.out.println("Input your birth date in the format dd/mm/yyyy.");
         String fecha;
         fecha = input.nextLine();
         while(!validarFecha(fecha)){
-            System.out.println("Ingresa una fecha valida.");
+            System.out.println("Input a valid date.");
             fecha = input.nextLine();
         }
         
-        System.out.println("Ingresa tu pais de residencia.");
+        System.out.println("Input your country of residence.");
         String pais;
         pais = input.nextLine();
         while(pais.equals("EUA") || !validarPais(pais)){
             if(pais.equals("EUA")){
-                System.out.println("Lo sentimos, somos racistas contra los gringos. Ingresa un verdadero pais.");
+                System.out.println("We are sorry, we do not like Americans. Input a better country.");
                 pais = input.nextLine();
             } else if (!validarPais(pais)){
-                System.out.println("Ingresa un pais valido.");
+                System.out.println("Input a valid country.");
                 pais = input.nextLine();
             }
         }
         
-        System.out.println("Ingresa tu correo electronico.");
+        System.out.println("Input your e-mail.");
         String correo;
         correo = input.nextLine();
         while(!validarCorreo(correo)){
-            System.out.println("Ingresa un correo valido.");
+            System.out.println("Input a valid e-mail.");
             correo = input.nextLine();
         }
         
-        System.out.println("Ingresa tu nombre de usuario.");
+        System.out.println("Input your username.");
         String usuario;
         usuario = input.nextLine();
         while(!validarUsuario(usuario)){
-            System.out.println("Ingresa un usuario valido.");
+            System.out.println("Input a valid username.");
             usuario = input.nextLine();
         }
         
-        System.out.println("¡Bienvenido a Twitter!");
+        System.out.println("Welcome to Twitter!");
     }
 }

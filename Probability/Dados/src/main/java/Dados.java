@@ -1,5 +1,5 @@
 /**
- * Simulacion de un juego de dados con las especificaciones dadas.
+ * Simulation of a game of dice with certain specifications.
  * @author Ivan C.
  * @version Octubre, 2020.
  */
@@ -9,26 +9,26 @@ import java.util.Scanner;
 public class Dados {
     
     public static void main(String[] args){
-        // Se definen los puntajes de los jugadores.
+        // Definition of the players' scores.
         int player1 = 0;
         int player2 = 0;
         int house = 0;
-        // Declarar las variables pertinentes al nombre de los jugadores.
+        // Variable declaration for the players' names.
         String name;
         Scanner input = new Scanner(System.in);
-        // Guardar los nombres de los jugadores.
-        System.out.println("Bienvenidos al casino. Ingresa el nombre del jugador 1: ");
+        // Saves the names of the players.
+        System.out.println("Welcome to the casino. Write the name for player 1: ");
         String inp1 = input.nextLine();
-        System.out.println("Ahora el nombre del jugador 2: ");
+        System.out.println("Now the name for player 2: ");
         String inp2 = input.nextLine();
-        // Se numeran los diez tiros.
+        // The ten throws are enumerated.
         for(int i = 0; i<10; i++){
-            // Tiros individuales de cada jugador.
+            // Individual throws for each player.
             for(int j=0; j<2; j++){
-                // Calculo de los tiros aleatorios.
+                // Calculation of the random throws.
                 int random_int1 = (int)(Math.random()*6 + 1);
                 int random_int2 = (int)(Math.random()*6 + 1);
-                // Asignacion de puntaje para el primer jugador.
+                // Score assignation for the first player.
                 if (j==0){
                     name = inp1;
                     int sum = random_int1 + random_int2;
@@ -49,10 +49,10 @@ public class Dados {
                           house += 1;
                         break;
                     }
-                    System.out.println("El tiro #" + (i+1) + " del jugador " + name + " fue " + random_int1 + " y "
+                    System.out.println("The throw #" + (i+1) + " of the player " + name + " was " + random_int1 + " and "
                             + random_int2 + ".");
                 }
-                // Asignacion del puntaje para el segundo jugador.
+                // Score assignation for the second player.
                 else{
                     name = inp2;
                     int sum = random_int1 + random_int2;
@@ -73,34 +73,34 @@ public class Dados {
                           house += 1;
                         break;
                     }
-                    System.out.println("El tiro #" + (i+1) + " del jugador " + name + " fue " + random_int1 + " y "
+                    System.out.println("The throw #" + (i+1) + " of the player " + name + " was " + random_int1 + " and "
                             + random_int2 + ".");
                 }
             }
         }
-    // Aviso de los puntajes totales.
-    System.out.println("A continuacion, los puntajes finales.");
+    // Total scores.
+    System.out.println("Next up, the final scores.");
     System.out.println(inp1 + ": " + player1 + ".");
     System.out.println(inp2 + ": " + player2 + ".");
-    System.out.println("Computadora: " + house + ".");
-    //Se determina el resultado del juego y se anuncia el ganador (si lo hay).
+    System.out.println("House: " + house + ".");
+    // The result of the game is determined and the winner (if there is one) is announced.
     if (player1 > player2 && player1 > house){
-        System.out.println("El ganador es: " + inp1.toUpperCase() + ".");
+        System.out.println("The winner is: " + inp1.toUpperCase() + ".");
     }
     else if (player2 > player1 && player2 > house){
-        System.out.println("El ganador es: " + inp2.toUpperCase() + ".");
+        System.out.println("The winner is: " + inp2.toUpperCase() + ".");
     }
     else if (house > player1 && house > player2){
-        System.out.println("El ganador es la COMPUTADORA.");
+        System.out.println("The HOUSE wins.");
     }
     else if (player1 == player2 && player2 == house){
-        System.out.println("EMPATE.");
+        System.out.println("It's a tie.");
     }
     else if (player1 > player2 && player1 == house){
-        System.out.println("EMPATE.");
+        System.out.println("It's a tie.");
     }
     else if (player2 > player1 && player2 == house){
-        System.out.println("EMPATE.");
+        System.out.println("It's a tie.");
     }
     }
 }
