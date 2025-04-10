@@ -1,6 +1,6 @@
 # Supervised learning
 
-Scripts I created for university assignments and projects.
+Scripts and markdown I created for exams at uni.
 
 Mostly in Spanish.
 
