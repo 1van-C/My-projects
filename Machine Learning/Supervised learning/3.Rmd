@@ -1,0 +1,234 @@
+---
+title: '3. Componentes principales y análisis factorial exploratorio'
+output: 
+  pdf_document: 
+    keep_tex: yes
+header-includes:
+- \usepackage[spanish]{babel}
+- \decimalpoint
+- \newcommand{\E}{\mathrm{E}}
+- \newcommand{\V}{\mathrm{V}}
+- \newcommand{\Cov}{\mathrm{Cov}}
+- \usepackage{caption}
+- \captionsetup[figure]{labelformat=empty}
+---
+
+\hrule
+
+\medskip
+
+```{r include = FALSE}
+
+# Preparamiento del environment.
+
+rm(list = ls(all.names = TRUE))
+gc()
+
+library(ggplot2)
+library(factoextra)
+library(psych)
+library(GPArotation)
+library(polycor)
+
+# Preprocesamiento de los datos.
+
+Data = read.csv('Dat3Ex.csv')
+Data = Data[, c('V1', 'V2', 'V3', 'V6', 'V8', 'V12', 'V13', 'V16', 'V17', 'V26', 'V27', 'V28', 'V31', 'V33', 'V37')]
+str(Data)
+
+```
+
+El objetivo principal es describir las observaciones con un número reducido de variables y hallar proyecciones para coadyuvar a una posible reinterpretación.
+
+\subsection{\textbf{i.} Componentes principales}
+
+\subsubsection{Escala original}
+
+La manera más sencilla es analizar sin transformar los datos.
+
+```{r include = FALSE}
+
+# Componentes principales con variables continuas en escala original.
+
+prin_comp_scaleless = prcomp(Data, scale = FALSE)
+summary(prin_comp_scaleless)
+
+# Correlaciones.
+
+round(cor(cbind(prin_comp_scaleless$x[, 1:5], Data)), digits = 3)
+
+```
+
+De aquí parecen haber asociaciones según la influencia gráfica de las primeras dos componentes principales. Se puede decir que la primera representa la percepción negativa generada en los demás. Se espera que no se tenga un buen desarrollo social a valores positivos, mientras que negativos serían de alguien agradable y diligente con sus responsabilidades. La segunda se asocia a la extroversión o introversión del individuo.
+
+\subsubsection{Escala transformada}
+
+Para hallar un mejor contraste se puede usar una escala distinta y realizar el análisis de componentes principales con el método de maximización de varianza explicada sin el requisito de correlación cero.
+
+```{r include = FALSE}
+
+# Componentes principales con variables continuas con escala logarítmica para cuatro componentes.
+
+(prin_comp_log = principal(log(Data), nfactors = 5, rotate = 'none', scores = TRUE))
+
+```
+
+```{r echo = FALSE, fig.cap = '\\textit{Biplot} de las CP para datos sin escala ($\\leftarrow$) y análisis de CP para datos con escala logarítmica ($\\rightarrow$)', figures-side, fig.show = "hold", out.width = "60%"}
+
+# Gráficas
+
+# Biplot de los datos sin transformación.
+
+fviz_pca_var(prin_comp_scaleless, col.var = "contrib", title = 'Biplot de los componentes principales', gradient.cols = c('darkgoldenrod', '#880808'))
+
+# Análisis de componentes principales con datos transformados.
+
+fa.diagram(prin_comp_log)
+
+```
+
+Al aplicarle logaritmo natural a los datos se hallaron asociaciones similares.
+\begin{itemize}
+\item Con la escala logarítmica, las preguntas de alta correlación para la componente uno son las preguntas 2, 12, 27 y 37, mientras que la 16 es de correlación negativa; el valor positivo de esta componente se asocia al desenvolvimiento negativo con otras personas.
+\item Para la segunda componente, las de mayor influencia positiva son la 1 y 26: características usualmente asociadas a la extroversión. Por otro lado, las preguntas 6 y 31 tienen correlación significativamente negativa y tratan más sobre ser introvertido. Con estos resultados, se puede decir que esta componente revisa la forma en que uno responde ante la socialización.
+\item La componente 3 es influenciada positivamente por la variable 3, 28 y 33. Podría decirse que define la ética de trabajo individual y la responsabilidad.
+\item Hay correlación notoria de las preguntas 8 y 17 con la cuarta componente. Puede ser la asociada a la naturaleza relajada prominente en los hippies.
+\item La quinta componente se afecta negativamente por la pregunta 13, de donde se infiere que apunta a la desconfianza generada por la persona.
+\end{itemize}
+
+Aunque se explica el 65\% de la varianza, la interpretación se dificulta con más componentes. Sin embargo, estos pueden ser de utilidad para formar un panorama general de los pacientes de un terapeuta.
+
+\subsection{\textbf{ii.} Análisis exploratorio factorial}
+
+Se seguirá el mismo plan de acción para esta sección.
+
+\subsubsection{Escala original}
+
+```{r include = FALSE}
+
+set.seed(666)
+
+(fa.parallel(Data, fa = "fa", n.iter = 100))
+
+#fac_an = fa(Data, nfactors = 3)
+#fac_an = fa(Data, nfactors = 4)
+fac_an = fa(Data, nfactors = 5)
+#fac_an = fa(Data, nfactors = 6)
+#fac_an = fa(Data, nfactors = 7)
+fac_an$communalities
+summary(fac_an)
+
+```
+
+Con cinco factores se encontró una interpretabilidad adecuada con una representación aceptable para todas las variables. El primer factor explica las preguntas asociadas con los estímulos extrapersonales negativos y la incapacidad de perdonar en menor medida. El tercero se asocia a características de un buen trabajador y está relacionado con el quinto factor, que modela la tendencia a perseverar hasta acabar las tareas. El segundo trata a la personalidad sumisa, tanto introvertida como insegura, y está relacionado negativamente con el cuarto, que ve el carácter abierto y amigable. Estos factores podrían servir para que el encargado de recursos humanos de una institución optimice su clasificación de candidatos.
+
+\subsubsection{Escala transformada}
+
+Para este caso se estandarizaron de la forma usual a los datos:
+
+\[z=\frac{x-\mu}{\sigma},\]
+
+mediante la función \textit{scale} de R base.
+
+```{r include = FALSE}
+
+# Análisis factorial para datos estandarizados.
+
+(fa.parallel(scale(Data), fa = "fa", n.iter = 100))
+
+fac_an_stand = fa(Data, nfactors = 3)
+#fac_an_stand = fa(Data, nfactors = 4)
+#fac_an_stand = fa(Data, nfactors = 5)
+#fac_an_stand = fa(Data, nfactors = 6)
+#fac_an_stand = fa(Data, nfactors = 7)
+
+fac_an_stand$communalities
+summary(fac_an_stand)
+
+```
+
+```{r echo = FALSE, fig.cap = 'Análisis factorial para los datos sin transformar (izquierda) y estandarizados (derecha)', fig.show = "hold", out.width = "60%"}
+
+# Gráfico del análisis factorial sin escala.
+
+#fa.diagram(fac_an_1, cut = 0.5)
+fa.diagram(fac_an)
+
+# Gráfico del análisis factorial con datos estandarizados.
+
+#fa.diagram(fac_an_1, cut = 0.5)
+fa.diagram(fac_an_stand)
+
+```
+
+La interpretación se modifica levemente para tres factores, aunque el modelo pierde capacidad de explicación de las preguntas 8 y 17. El primer factor queda exactamente igual al caso anterior, pero el segundo trata a la extroversión personal. El tercero se asocia más a la eficiencia y responsabilidad laboral. Este análisis podría ser de utilidad para que una filtrar pretendientes amorosos, por lo que un sitio de citas como Tinder haría buen uso de él.
+
+\subsection{\textbf{iii.} Modificaciones}
+
+Se procede a experimentar con la categorización ordinal y rotaciones. Por lo tanto se calculó la matriz de correlaciones por el método policórico para los datos ordinales mediante la paquetería \textit{polycor}.
+
+```{r include = FALSE}
+
+# Categorización de los datos.
+
+ord_Data = Data
+ord_Data[sapply(Data, is.numeric)] = lapply(ord_Data[sapply(ord_Data, is.numeric)], as.factor)
+str(ord_Data)
+
+# Matriz de correlaciones.
+
+cos_mat = hetcor(ord_Data)
+cos_mat$correlations
+
+# Iteraciones de componentes principales.
+
+rots = c("varimax", "quartimax", "promax", "oblimin", "simplimax", "cluster")
+
+for (i in 3:5){
+  for (j in rots){
+    fa.diagram(principal(cos_mat$correlations, nfactors = i, rotate = j, scores = TRUE), cut = 0.5)
+  }  
+}
+
+(final_pca = principal(cos_mat$correlations, nfactors = 4, rotate = 'cluster', scores = TRUE))
+fa.diagram(final_pca, cut = 0.5)
+
+# Iteraciones de análisis factorial.
+
+for (i in 3:5){
+  for (j in rots){
+    fa.diagram(fa(cos_mat$correlations, nfactors = i, rotate = j), cut = 0.5)
+  }
+}
+
+(final_fa = fa(cos_mat$correlations, nfactors = 4, rotate = 'promax'))
+fa.diagram(final_fa)
+
+```
+
+Dado el mayor porcentaje de varianza explicada (0.66) y correlaciones más extremas ---además de una interpretación más sensata--- se estima que el mejor modelo es el de cuatro componentes principales y rotación \textit{cluster}.
+
+```{r include = FALSE}
+
+# Summary del modelo de componentes principales final.
+
+summary(final_pca)
+
+```
+
+Este modelo se interpreta de manera simple. A continuación están las representaciones de las componentes principales halladas:
+\begin{enumerate}
+\item Con las preguntas 2, 12, 27 y 37 con alta y la 17 con baja correlación, se tiene que esta componente involucra a la incapacidad de formar buenas relaciones con los demás.
+\item Presenta a la extroversión y carisma dado que las preguntas 1, 16 y 26 tienen alta influencia positiva y las 6 y 31 negativa.
+\item Son las señales de un buen trabajador: centrado, responsable y conclusivo, descritas por la buena relación con las preguntas 3, 13, 28 y 33.
+\item La última componente acapara sólo a la pregunta 8, lo cual tiene sentido pues esta no parece tener mucho que ver con las demás preguntas disponibles. Se puede decir que trató a esta variable ''atípica'' al resumir el potencial de valemadrismo.
+\end{enumerate}
+
+```{r echo = FALSE, fig.cap = 'Componentes principales de datos ordinales con rotación \\textit{cluster}', fig.show = "hold", out.width = "75%", fig.align = 'center'}
+
+# Gráfico de componentes principales con datos categóricos ordinales con rotación cluster.
+
+fa.diagram(final_pca, cut = 0.5)
+
+```
+

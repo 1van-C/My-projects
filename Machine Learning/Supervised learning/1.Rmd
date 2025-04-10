@@ -1,0 +1,146 @@
+---
+title: '1. Bootstrap no paramétrico'
+output: 
+  pdf_document: 
+    keep_tex: yes
+header-includes:
+- \usepackage[spanish]{babel}
+- \decimalpoint
+- \newcommand{\E}{\mathrm{E}}
+- \newcommand{\V}{\mathrm{V}}
+- \newcommand{\Cov}{\mathrm{Cov}}
+- \usepackage{caption}
+- \captionsetup[figure]{labelformat=empty}
+---
+
+\hrule
+
+\vfill
+
+\newpage
+
+```{r include = FALSE}
+
+# Preparamiento del environment.
+
+rm(list = ls(all.names = TRUE))
+gc()
+
+set.seed(888)
+
+library(ggplot2)
+
+```
+
+\subsection{\textbf{a.} Método Monte Carlo}
+
+Para estimar el parámetro se generan diez mil muestras ---cada una con 25 observaciones--- de la variable aleatoria $\displaystyle\widehat{\tau} \sim \text{Poi}(\lambda = 2.5)$.
+
+```{r include = FALSE}
+
+# Generación de muestras para tau y almacenado en un dataframe.
+
+mc_tau = c()
+
+for (i in 1:10000){
+  mc_tau_i = (24/25)^(sum(rpois(25, lambda = 2.5)))
+  mc_tau = c(mc_tau, mc_tau_i)
+}
+
+mc_tau_df = data.frame(mc_tau)
+mc_tau_df$sq_mc_tau_df = mc_tau_df$mc_tau^2
+
+# Esperanza y varianza.
+
+mc_expec_tau = sum(mc_tau)/10000
+
+mc_var_tau = sum(mc_tau_df$sq_mc_tau_df)/10000 - mc_expec_tau^2
+
+```
+
+De este modo, el método Monte Carlo indica que
+
+\begin{align*}
+\E\left[\widehat{\tau}\right]&\approx\frac{\sum_{i=i}^{10000}\widehat{\tau}_i}{10000} & &\& & \V\left[\widehat{\tau}\right] &= \E\left[\widehat{\tau}^2\right]-\E\left[\widehat{\tau}\right]^2\\
+&= `r format(round(mc_expec_tau, digits = 7), nsmall = 7)`, & & & &\approx `r format(round(mc_var_tau, digits = 7), nsmall = 7)`.
+\end{align*}
+
+Las muestras generadas se pueden ver en la figura siguiente:
+
+```{r echo = FALSE, warning = FALSE, fig.cap = 'Histograma para las muestras generadas por Monte Carlo', out.width = '75%', fig.align = 'center'}
+
+# Histograma para tau de Monte Carlo.
+
+ggplot(mc_tau_df, aes(x = mc_tau)) +
+  geom_histogram(color = 'black', fill = '#880808', aes(y = (..count..)/sum(..count..)), bins = 30) +
+  labs(
+    title = 'Distribución de las muestras generadas',
+    x = expression(widehat(tau)),
+    y = 'Porcentaje',
+  ) +
+  scale_x_continuous(breaks = seq(0, max(mc_tau), 0.02)) +
+  scale_y_continuous(labels = scales::percent) +
+  theme_bw()
+
+```
+
+\subsection{\textbf{b.} \textit{Bootstrap} no paramétrico}
+
+En contraste, para aplicar \textit{bootstrap} sólo se necesita tomar una muestra Poisson, en este caso de tamaño 25.
+
+```{r echo = FALSE}
+
+# Generación de muestras Poisson y almacenado en un dataframe.
+
+b_tau = rpois(25, lambda = 2.5)
+
+b_tau_df = data.frame(b_tau)
+
+# Función para el parámetro buscado.
+
+tau_stat = function(data, index){
+  new_data = data[c(index)]
+  tau_param = (24/25)^(sum(new_data))
+  return(tau_param)
+}
+
+# Bootstrap con lo definido previamente.
+
+(bstrap = boot::boot(data = b_tau, R = 10000, statistic = tau_stat))
+
+# Dataframe auxiliar para la gráfica.
+
+b_tau_g_df = data.frame(bstrap$t)
+
+```
+
+De aquí se tiene que
+
+\begin{align*}
+\E\left[\widehat{\tau}\right] &= `r format(round(bstrap$t0, digits = 7), nsmall = 7)` & &\land & \V\left[\widehat{\tau}\right] &= `r format(round(var(bstrap$t), digits = 7), nsmall = 7)`.
+\end{align*}
+
+Luego se presenta la visualización de las muestras del método:
+
+```{r echo = FALSE, warning = FALSE, fig.cap = 'Histograma para las muestras generadas por \\textit{bootstrapping}', out.width = '75%', fig.align = 'center'}
+
+# Histograma para tau de bootstrap.
+
+ggplot(b_tau_g_df, aes(x = bstrap.t)) +
+  geom_histogram(color = 'black', fill = '#880808', aes(y = (..count..)/sum(..count..)), bins = 30) +
+  labs(
+    title = 'Distribución de las muestras generadas',
+    x = expression(widehat(tau)),
+    y = 'Porcentaje',
+  ) +
+  scale_x_continuous(breaks = seq(0, max(b_tau_g_df), 0.02)) +
+  scale_y_continuous(labels = scales::percent) +
+  theme_bw()
+
+```
+
+En este caso, los métodos difirieron en aproximadamente 0.017 para la esperanza del estimador y 0.00015 para su varianza, sin mencionar la similaridad visual hallada. Como se esperaba, ambos se asemejan a una distribución Poisson con parámetros ligeramente modificados.
+
+La cercanía que se alcanzó es encomendable, especialmente al considerar que \textit{bootstrap} no necesita supuestos o componentes adicionales a los datos crudos para mostrar una estimación aceptable del parámetro y su distribución. Sin embargo, los pocos (25) datos de entrada hacen que los resultados varíen con cada aplicación; por otra parte, Monte Carlo se mostró más consistente en repeticiones subsecuentes.
+
+\newpage
