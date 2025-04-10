@@ -1,6 +1,6 @@
 Here you will find some of the scripts and projects that I have developed throughout my career.
 
-<img src = "[https://github.com/user-attachments/assets/16efb735-520e-4ddf-9dd5-15ca544935cd.jpg]" width = 50% height = 50%>
+<img src = "[https://github.com/user-attachments/assets/16efb735-520e-4ddf-9dd5-15ca544935cd.png]" width = 50% height = 50%>
 
 ![image](https://github.com/user-attachments/assets/16efb735-520e-4ddf-9dd5-15ca544935cd)
 
